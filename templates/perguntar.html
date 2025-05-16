@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <title>Perguntar</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Faça uma pergunta sobre o texto</h1>
+
+        <form action="{{ url_for('perguntar') }}" method="post">
+            <textarea name="pergunta" placeholder="Digite sua pergunta" required rows="5"></textarea>
+            <button type="submit">Enviar</button>
+        </form>
+
+        {% if erro %}
+            <p class="error">{{ erro }}</p>
+        {% endif %}
+
+        {% if resposta %}
+            <h2>Resposta:</h2>
+            <p class="resposta">{{ resposta }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
