@@ -1,35 +1,30 @@
 from flask import Flask, render_template, request, redirect, url_for
-from openai import OpenAI
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 app = Flask(__name__)
 
-with open("documento.txt", "r", encoding="utf-8") as f:
-    texto_base = f.read()
+# Initialize OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def gerar_resposta(pergunta, contexto):
-    prompt = (
-        "Responda a pergunta usando apenas o texto abaixo, sem adicionar informações externas. "
-        "Se a resposta não estiver no texto, responda 'Não há informação suficiente no texto para responder.'\n\n"
-        f"Texto:\n{contexto}\n\n"
-        f"Pergunta: {pergunta}\nResposta:"
-    )
+# Função que gera resposta
+def gerar_resposta(pergunta):
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=[
-                {"role": "system", "content": "Você é um assistente útil."},
-                {"role": "user", "content": prompt},
+                {"role": "system", "content": "Você é um assistente prestativo e amigável."},
+                {"role": "user", "content": pergunta}
             ],
-            max_tokens=200,
-            temperature=0,
+            temperature=0.7,
+            max_tokens=500
         )
-        return response.choices[0].message.content.strip()
+        return response.choices[0].message.content
     except Exception as e:
-        print("Erro API OpenAI:", e)
+        print(f"Erro na geração: {str(e)}")
         return None
 
 @app.route("/")
@@ -44,9 +39,9 @@ def perguntar():
         if not pergunta:
             erro = "Por favor, digite sua pergunta."
         else:
-            resposta = gerar_resposta(pergunta, texto_base)
+            resposta = gerar_resposta(pergunta)
             if resposta is None:
-                erro = "Erro ao processar a sua pergunta. Tente novamente mais tarde."
+                erro = "Erro ao processar a sua pergunta."
     return render_template("perguntar.html", resposta=resposta, erro=erro, pergunta=pergunta)
 
 if __name__ == "__main__":
